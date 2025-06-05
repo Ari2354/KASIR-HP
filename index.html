@@ -11,20 +11,38 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="login-container">
-    <h1>Arum Mobile</h1>
-    <form id="login-form">
-      <div class="input-group">
-        <i class="fa fa-envelope icon"></i>
-        <input type="email" id="email" placeholder="Email" required />
+  <div class="login-wrapper">
+    <div class="login-left">
+      <div class="logo" style="margin-bottom: 24px;">
+<svg width="300" height="50" viewBox="0 0 300 50" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+          <title>Arum Mobile Logo</title>
+          <desc>Logo with stylized mobile phone icon and text Arum Mobile</desc>
+          <rect x="5" y="5" width="30" height="40" rx="5" ry="5" fill="#4F46E5" />
+          <rect x="17" y="38" width="6" height="3" rx="1.5" ry="1.5" fill="#312E81" />
+          <rect x="15" y="12" width="10" height="20" fill="white" rx="2" ry="2" />
+          <rect x="15" y="12" width="10" height="18" fill="#A5B4FC" rx="2" ry="2" />
+          <text x="45" y="32" fill="#4F46E5" font-family="Poppins, sans-serif" font-size="28" font-weight="700" letter-spacing="1">
+            Arum Mobile
+          </text>
+        </svg>
       </div>
-      <div class="input-group">
-        <i class="fa fa-lock icon"></i>
-        <input type="password" id="password" placeholder="Password" required />
-      </div>
-      <button type="submit"><i class="fa fa-sign-in-alt"></i> Login</button>
-    </form>
-    <div id="login-error" class="error-message"></div>
+      <h1>Welcome To Panel Arum Mobile</h1>
+      <form id="login-form">
+        <div class="input-group">
+          <label for="email">Username:</label>
+          <input type="email" id="email" placeholder="Email" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" placeholder="Password" required />
+        </div>
+        <button type="submit">Login</button>
+        <div id="login-error" class="error-message"></div>
+      </form>
+    </div>
+    <div class="login-right">
+      <img src="hp.jpg" alt="Laptop Illustration" />
+    </div>
   </div>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
