@@ -76,7 +76,25 @@
         Keranjang kosong
       </div>
       <div class="mt-4">
+        <label for="payment-method" class="block mb-2 font-semibold text-gray-700">Metode Pembayaran</label>
+        <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="cash">Tunai</option>
+          <option value="credit_card">Kartu Kredit</option>
+          <option value="debit_card">Kartu Debit</option>
+          <option value="e_wallet">E-Wallet</option>
+        </select>
         <button id="checkout-btn" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200" disabled>Checkout</button>
+      </div>
+    </section>
+
+    <!-- Daily Sales Report -->
+    <section id="daily-sales-report" class="bg-white rounded-lg shadow-md p-6 mt-6 md:col-span-3">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Laporan Penjualan Harian</h3>
+      <div id="sales-report-content" class="overflow-auto max-h-96 border border-gray-300 rounded-md p-4 bg-gray-50 text-gray-800 font-mono text-sm whitespace-pre-wrap">
+        Memuat laporan...
+      </div>
+      <div class="mt-4">
+        <button id="print-report-btn" class="w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800 transition-colors duration-200">Cetak Laporan</button>
       </div>
     </section>
   </div>
