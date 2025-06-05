@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arum Mobile - Kasir Dashboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <h2>Arum Mobile - Kasir</h2>
+    </div>
+    <div class="nav-right">
+      <button id="logout-btn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <section id="transaction-section">
+      <h3>Transaksi Penjualan</h3>
+      <form id="transaction-form">
+        <select id="product-select" required>
+          <option value="">Pilih Produk</option>
+        </select>
+        <input type="number" id="product-quantity" placeholder="Jumlah" min="1" value="1" required />
+        <input type="text" id="total-price" placeholder="Total Harga" readonly />
+        <button type="submit"><i class="fa fa-save"></i> Simpan Transaksi</button>
+      </form>
+    </section>
+
+    <section id="shift-section">
+      <h3>Ganti Shift</h3>
+      <button id="start-shift-btn"><i class="fa fa-clock"></i> Mulai Shift Baru</button>
+      <div id="current-shift-info"></div>
+    </section>
+
+    <section id="receipt-section" style="display:none;">
+      <h3>Struk Transaksi</h3>
+      <pre id="receipt"></pre>
+      <button id="print-receipt-btn"><i class="fa fa-print"></i> Cetak Struk</button>
+    </section>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/kasir.js"></script>
+</body>
+</html>

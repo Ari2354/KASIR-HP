@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arum Mobile - Admin Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <h2>Arum Mobile - Admin</h2>
+    </div>
+    <div class="nav-right">
+      <button id="logout-btn"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- Wrapper -->
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item active" data-target="product-management"><i class="fa fa-box"></i> Produk</li>
+        <li class="sidebar-item" data-target="transaction-management"><i class="fa fa-exchange-alt"></i> Transaksi</li>
+        <li class="sidebar-item" data-target="report-section"><i class="fa fa-chart-line"></i> Laporan</li>
+        <li class="sidebar-item" data-target="kasir-management"><i class="fa fa-users"></i> Kasir</li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Produk Section -->
+      <section id="product-management" class="content-section active">
+        <h3>Manajemen Produk</h3>
+        <form id="product-form" autocomplete="off">
+          <input type="hidden" id="product-id" />
+          <input type="text" id="product-name" placeholder="Nama Produk" required />
+          <input type="number" id="product-buy-price" placeholder="Harga Beli" required min="0" />
+          <input type="number" id="product-sell-price" placeholder="Harga Jual" required min="0" />
+          <input type="number" id="product-stock" placeholder="Stok" required min="0" />
+          <input type="text" id="product-category" placeholder="Kategori (opsional)" />
+          <button type="submit"><i class="fa fa-save"></i> Simpan</button>
+          <button type="button" id="product-cancel-btn"><i class="fa fa-times"></i> Batal</button>
+        </form>
+
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Harga Beli</th>
+              <th>Harga Jual</th>
+              <th>Stok</th>
+              <th>Kategori</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Transaksi Section -->
+      <section id="transaction-management" class="content-section">
+        <h3>Manajemen Transaksi</h3>
+        <table id="transactions-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Kasir</th>
+              <th>Produk</th>
+              <th>Jumlah</th>
+              <th>Total</th>
+              <th>Tanggal</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Laporan Section -->
+      <section id="report-section" class="content-section">
+        <h3>Laporan Laba/Rugi</h3>
+        <div id="report-content">
+          <p>Total Pendapatan: <strong><span id="total-revenue">0</span></strong></p>
+          <p>Total Modal: <strong><span id="total-cost">0</span></strong></p>
+          <p>Laba/Rugi: <strong><span id="profit-loss">0</span></strong></p>
+        </div>
+      </section>
+
+      <!-- Kasir Section -->
+      <section id="kasir-management" class="content-section">
+        <h3>Manajemen Kasir</h3>
+        <form id="kasir-form" autocomplete="off">
+          <input type="email" id="kasir-email" placeholder="Email Kasir" required />
+          <input type="password" id="kasir-password" placeholder="Password" required />
+          <button type="submit"><i class="fa fa-user-plus"></i> Tambah Kasir</button>
+        </form>
+        <table id="kasir-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="js/firebase-config.js"></script>
+
+  <!-- Admin JS -->
+  <script src="js/admin.js"></script>
+ 
+</body>
+</html>
