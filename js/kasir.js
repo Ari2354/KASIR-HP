@@ -156,6 +156,7 @@ async function loadProducts() {
     const snapshot = await db.collection('products').get();
     products = snapshot.docs.map(doc => {
       const data = doc.data();
+      console.log('Product loaded:', data);
       return {
         id: doc.id,
         brand: data.brand || '',
