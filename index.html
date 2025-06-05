@@ -5,45 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Arum Mobile - Login</title>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-  <div class="login-wrapper">
-    <div class="login-left">
-      <div class="logo" style="margin-bottom: 24px;">
-<svg width="300" height="50" viewBox="0 0 300 50" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-          <title>Arum Mobile Logo</title>
-          <desc>Logo with stylized mobile phone icon and text Arum Mobile</desc>
-          <rect x="5" y="5" width="30" height="40" rx="5" ry="5" fill="#4F46E5" />
-          <rect x="17" y="38" width="6" height="3" rx="1.5" ry="1.5" fill="#312E81" />
-          <rect x="15" y="12" width="10" height="20" fill="white" rx="2" ry="2" />
-          <rect x="15" y="12" width="10" height="18" fill="#A5B4FC" rx="2" ry="2" />
-          <text x="45" y="32" fill="#4F46E5" font-family="Poppins, sans-serif" font-size="28" font-weight="700" letter-spacing="1">
-            Arum Mobile
-          </text>
-        </svg>
+<body class="bg-gray-50">
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+  </div>
+
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+      <!-- Left Side - Login Form -->
+      <div class="w-full md:w-1/2 p-8">
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg">
+              <i class="fas fa-mobile-alt text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Arum Mobile</h1>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-700">Welcome Back!</h2>
+          <p class="text-gray-500 mt-2">Please sign in to your account</p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              autocomplete="email"
+              required 
+              class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="password" 
+                name="password"
+                autocomplete="current-password" 
+                required 
+                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                  focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div id="login-error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3 hidden"></div>
+
+          <div>
+            <button 
+              type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+            >
+              <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+            </button>
+          </div>
+        </form>
       </div>
-      <h1>Welcome To Panel Arum Mobile</h1>
-      <form id="login-form">
-        <div class="input-group">
-          <label for="email">Username:</label>
-          <input type="email" id="email" placeholder="Email" required />
+
+      <!-- Right Side - Image -->
+      <div class="hidden md:block md:w-1/2 bg-cover bg-center" style="background-image: url('hp.jpg')">
+        <div class="h-full bg-black bg-opacity-25 p-12 flex items-end">
+          <div class="text-white">
+            <h3 class="text-2xl font-bold mb-2">Arum Mobile Store</h3>
+            <p class="text-sm opacity-90">Jl. Sumatra 11 No 41, Sumbersari, Jember</p>
+          </div>
         </div>
-        <div class="input-group">
-          <label for="password">Password:</label>
-          <input type="password" id="password" placeholder="Password" required />
-        </div>
-        <button type="submit">Login</button>
-        <div id="login-error" class="error-message"></div>
-      </form>
-    </div>
-    <div class="login-right">
-      <img src="hp.jpg" alt="Laptop Illustration" />
+      </div>
     </div>
   </div>
+
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>

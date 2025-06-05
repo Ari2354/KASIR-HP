@@ -1,178 +1,280 @@
-// Kasir dashboard logic: transaction and shift management
-
 const logoutBtn = document.getElementById('logout-btn');
-const productSelect = document.getElementById('product-select');
-const productQuantity = document.getElementById('product-quantity');
-const totalPriceInput = document.getElementById('total-price');
-const transactionForm = document.getElementById('transaction-form');
+const searchInput = document.getElementById('search-input');
+const categorySelect = document.getElementById('category-select');
+const productsContainer = document.getElementById('products-container');
+const cartItemsContainer = document.getElementById('cart-items');
+const checkoutBtn = document.getElementById('checkout-btn');
+const loadingSpinner = document.getElementById('loading-spinner');
 
-const startShiftBtn = document.getElementById('start-shift-btn');
-const currentShiftInfo = document.getElementById('current-shift-info');
-
-const receiptSection = document.getElementById('receipt-section');
-const receiptPre = document.getElementById('receipt');
-const printReceiptBtn = document.getElementById('print-receipt-btn');
-
-let currentShiftId = null;
 let currentUserEmail = null;
+let products = [];
+let cart = [];
 
-// Check auth state and role
+function showSpinner() {
+  loadingSpinner.classList.remove('hidden');
+}
+
+function hideSpinner() {
+  loadingSpinner.classList.add('hidden');
+}
+
+function showNotification(message, type = 'error', duration = 3000) {
+  const container = document.getElementById('notification-container');
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 p-4 rounded-lg ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+  notification.textContent = message;
+  container.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, duration);
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount);
+}
+
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
+  try {
+    if (!user) {
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    currentUserEmail = user.email;
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    
+    if (!userDoc.exists || userDoc.data().role !== 'kasir') {
+      showNotification('Akses ditolak. Anda tidak memiliki izin kasir.', 'error');
+      await auth.signOut();
+      window.location.href = 'index.html';
+    } else {
+      await loadProducts();
+    }
+  } catch (error) {
+    console.error('Auth error:', error);
+    showNotification('Terjadi kesalahan saat memverifikasi akses.', 'error');
   }
-  currentUserEmail = user.email;
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  if (!userDoc.exists || userDoc.data().role !== 'kasir') {
-    alert('Access denied.');
+});
+
+logoutBtn.addEventListener('click', async () => {
+  try {
     await auth.signOut();
     window.location.href = 'index.html';
-  } else {
-    loadProducts();
-    loadCurrentShift();
+  } catch (error) {
+    console.error('Logout error:', error);
+    showNotification('Gagal logout. Silakan coba lagi.', 'error');
   }
 });
 
-// Logout
-logoutBtn.addEventListener('click', async () => {
-  await auth.signOut();
-  window.location.href = 'index.html';
-});
-
-// Load products into select dropdown
 async function loadProducts() {
-  productSelect.innerHTML = '<option value="">Pilih Produk</option>';
-  const snapshot = await db.collection('products').get();
-  snapshot.forEach(doc => {
-    const p = doc.data();
+  try {
+    showSpinner();
+    const snapshot = await db.collection('products').get();
+    products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderProducts(products);
+    loadCategories(products);
+  } catch (error) {
+    console.error('Load products error:', error);
+    showNotification('Gagal memuat daftar produk.', 'error');
+  } finally {
+    hideSpinner();
+  }
+}
+
+function loadCategories(products) {
+  const categories = [...new Set(products.map(p => p.category || 'Uncategorized'))];
+  categorySelect.innerHTML = '<option value="">Semua Kategori</option>';
+  categories.forEach(cat => {
     const option = document.createElement('option');
-    option.value = doc.id;
-    option.textContent = `${p.name} - Rp ${p.sellPrice}`;
-    option.dataset.sellPrice = p.sellPrice;
-    productSelect.appendChild(option);
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
   });
 }
 
-// Calculate total price on quantity or product change
-productSelect.addEventListener('change', calculateTotal);
-productQuantity.addEventListener('input', calculateTotal);
-
-function calculateTotal() {
-  const selectedOption = productSelect.options[productSelect.selectedIndex];
-  if (!selectedOption || !selectedOption.value) {
-    totalPriceInput.value = '';
+function renderProducts(productsToRender) {
+  productsContainer.innerHTML = '';
+  if (productsToRender.length === 0) {
+    productsContainer.innerHTML = '<p class="text-gray-500">Tidak ada produk ditemukan.</p>';
     return;
   }
-  const price = parseFloat(selectedOption.dataset.sellPrice) || 0;
-  const quantity = parseInt(productQuantity.value) || 0;
-  const total = price * quantity;
-  totalPriceInput.value = total.toFixed(2);
+  productsToRender.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'border rounded-lg p-4 flex flex-col justify-between bg-white shadow-sm hover:shadow-md transition-shadow';
+    card.innerHTML = `
+      <div>
+        <h4 class="font-semibold text-lg">${product.brand || ''} ${product.type || ''}</h4>
+        <p class="text-sm text-gray-600 mt-1">${product.description || ''}</p>
+        <p class="mt-2 text-lg font-bold text-indigo-600">${formatCurrency(product.price || 0)}</p>
+        <p class="text-sm text-gray-500">Stok: ${product.stock || 0}</p>
+      </div>
+      <button 
+        class="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        data-id="${product.id}"
+        ${product.stock <= 0 ? 'disabled' : ''}
+      >
+        Tambah ke Keranjang
+      </button>
+    `;
+    productsContainer.appendChild(card);
+  });
+
+  productsContainer.querySelectorAll('button').forEach(button => {
+    if (!button.disabled) {
+      button.addEventListener('click', () => {
+        const productId = button.getAttribute('data-id');
+        addToCart(productId);
+      });
+    }
+  });
 }
 
-// Save transaction
-transactionForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const productId = productSelect.value;
-  const quantity = parseInt(productQuantity.value);
-  if (!productId || isNaN(quantity) || quantity <= 0) {
-    alert('Pilih produk dan masukkan jumlah yang valid.');
+function addToCart(productId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+  
+  if (product.stock <= 0) {
+    showNotification('Stok produk habis.', 'error');
     return;
   }
 
-  try {
-    const productDoc = await db.collection('products').doc(productId).get();
-    if (!productDoc.exists) {
-      alert('Produk tidak ditemukan.');
+  const cartItem = cart.find(item => item.id === productId);
+  if (cartItem) {
+    if (cartItem.quantity >= product.stock) {
+      showNotification('Stok tidak mencukupi.', 'error');
       return;
     }
-    const product = productDoc.data();
-    if (product.stock < quantity) {
-      alert('Stok produk tidak cukup.');
-      return;
-    }
-
-    const totalPrice = product.sellPrice * quantity;
-
-    // Save transaction
-    await db.collection('transactions').add({
-      kasirEmail: currentUserEmail,
-      productId,
-      productName: product.name,
-      quantity,
-      totalPrice,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Update product stock
-    await db.collection('products').doc(productId).update({
-      stock: product.stock - quantity
-    });
-
-    // Show receipt
-    showReceipt(product.name, quantity, product.sellPrice, totalPrice);
-
-    // Reset form
-    transactionForm.reset();
-    totalPriceInput.value = '';
-  } catch (error) {
-    alert('Error menyimpan transaksi: ' + error.message);
-  }
-});
-
-function showReceipt(name, quantity, price, total) {
-  const date = new Date().toLocaleString();
-  const receiptText = 
-`Arum Mobile
-Jl. Sumatra 11 No 41, Sumbersari, Jember
-No HP: 081331089534
-
-Produk: ${name}
-Jumlah: ${quantity}
-Harga Satuan: Rp ${price.toFixed(2)}
-Total: Rp ${total.toFixed(2)}
-
-Tanggal: ${date}
-
-Terima kasih atas kunjungan Anda!
-`;
-  receiptPre.textContent = receiptText;
-  receiptSection.style.display = 'block';
-}
-
-// Print receipt
-printReceiptBtn.addEventListener('click', () => {
-  window.print();
-});
-
-// Shift management
-startShiftBtn.addEventListener('click', async () => {
-  try {
-    const shiftDoc = await db.collection('shifts').add({
-      kasirEmail: currentUserEmail,
-      startTime: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    currentShiftId = shiftDoc.id;
-    loadCurrentShift();
-  } catch (error) {
-    alert('Error memulai shift: ' + error.message);
-  }
-});
-
-async function loadCurrentShift() {
-  const snapshot = await db.collection('shifts')
-    .where('kasirEmail', '==', currentUserEmail)
-    .orderBy('startTime', 'desc')
-    .limit(1)
-    .get();
-
-  if (snapshot.empty) {
-    currentShiftInfo.textContent = 'Belum ada shift aktif.';
-    currentShiftId = null;
+    cartItem.quantity++;
   } else {
-    const shift = snapshot.docs[0].data();
-    const startTime = shift.startTime ? shift.startTime.toDate().toLocaleString() : '';
-    currentShiftInfo.textContent = `Shift aktif dimulai pada: ${startTime}`;
-    currentShiftId = snapshot.docs[0].id;
+    cart.push({ ...product, quantity: 1 });
   }
+  
+  showNotification('Produk ditambahkan ke keranjang.', 'success');
+  renderCart();
 }
+
+function renderCart() {
+  if (cart.length === 0) {
+    cartItemsContainer.innerHTML = '<p class="text-gray-500">Keranjang kosong</p>';
+    checkoutBtn.disabled = true;
+    return;
+  }
+
+  let total = 0;
+  cartItemsContainer.innerHTML = '';
+  
+  cart.forEach(item => {
+    const itemTotal = (item.price || 0) * item.quantity;
+    total += itemTotal;
+
+    const div = document.createElement('div');
+    div.className = 'flex justify-between items-start border-b py-3';
+    div.innerHTML = `
+      <div class="flex-1">
+        <p class="font-semibold">${item.brand || ''} ${item.type || ''}</p>
+        <p class="text-sm text-gray-600">
+          ${formatCurrency(item.price || 0)} x ${item.quantity}
+        </p>
+      </div>
+      <div class="text-right ml-4">
+        <p class="font-semibold">${formatCurrency(itemTotal)}</p>
+        <button class="text-red-600 hover:text-red-800" data-id="${item.id}">Hapus</button>
+      </div>
+    `;
+    cartItemsContainer.appendChild(div);
+  });
+
+  const totalDiv = document.createElement('div');
+  totalDiv.className = 'mt-4 pt-4 border-t';
+  totalDiv.innerHTML = `
+    <div class="flex justify-between items-center">
+      <p class="font-semibold">Total:</p>
+      <p class="font-bold text-lg">${formatCurrency(total)}</p>
+    </div>
+  `;
+  cartItemsContainer.appendChild(totalDiv);
+
+  checkoutBtn.disabled = false;
+
+  cartItemsContainer.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', () => {
+      const productId = button.getAttribute('data-id');
+      removeFromCart(productId);
+    });
+  });
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(item => item.id !== productId);
+  showNotification('Produk dihapus dari keranjang.', 'success');
+  renderCart();
+}
+
+function filterProducts() {
+  const searchTerm = searchInput.value.toLowerCase();
+  const selectedCategory = categorySelect.value;
+  
+  const filtered = products.filter(product => {
+    const matchesSearch = 
+      (product.brand?.toLowerCase().includes(searchTerm) || false) ||
+      (product.type?.toLowerCase().includes(searchTerm) || false) ||
+      (product.description?.toLowerCase().includes(searchTerm) || false);
+    
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+  
+  renderProducts(filtered);
+}
+
+searchInput.addEventListener('input', filterProducts);
+categorySelect.addEventListener('change', filterProducts);
+
+checkoutBtn.addEventListener('click', async () => {
+  if (cart.length === 0) return;
+
+  try {
+    showSpinner();
+    
+    const transaction = {
+      kasirEmail: currentUserEmail,
+      items: cart.map(item => ({
+        productId: item.id,
+        brand: item.brand,
+        type: item.type,
+        quantity: item.quantity,
+        pricePerUnit: item.price,
+        totalPrice: item.price * item.quantity
+      })),
+      totalAmount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    const transactionRef = await db.collection('transactions').add(transaction);
+
+    await Promise.all(cart.map(item => 
+      db.collection('products').doc(item.id).update({
+        stock: firebase.firestore.FieldValue.increment(-item.quantity)
+      })
+    ));
+
+    showNotification('Transaksi berhasil!', 'success');
+    cart = [];
+    renderCart();
+    await loadProducts();
+
+  } catch (error) {
+    console.error('Checkout error:', error);
+    showNotification('Gagal memproses transaksi.', 'error');
+  } finally {
+    hideSpinner();
+  }
+});
+
+renderCart();
